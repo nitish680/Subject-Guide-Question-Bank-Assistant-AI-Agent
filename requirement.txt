@@ -1,0 +1,6 @@
+langchain-core
+langchain
+pyPDF2
+chromadb
+sentence-transformer
+streamlit
