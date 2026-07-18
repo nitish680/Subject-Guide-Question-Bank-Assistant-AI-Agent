@@ -1,6 +1,10 @@
-langchain-core
-langchain
-pyPDF2
-chromadb
-sentence-transformer
 streamlit
+python-dotenv
+openai
+langchain
+langchain-groq
+langchain_community
+langchain_core
+pypdf
+chromadb
+sentence-transformers
