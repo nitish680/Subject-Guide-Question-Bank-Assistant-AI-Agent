@@ -20,17 +20,20 @@ import tempfile
 uploaded_file = st.file_uploader("Upload PDF", type="pdf")
 
 if uploaded_file:
+    try:
 
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
 
-        tmp.write(uploaded_file.read())
+            tmp.write(uploaded_file.read())
 
-        pdf_path = tmp.name
+            pdf_path = tmp.name
 
-    rag_chat.data_pipline(pdf_path)
+        rag_chat.data_pipline(pdf_path)
 
-    st.session_state.processed = True
-    st.success("PDF uploaded successfully!")
+        st.session_state.processed = True
+        st.success("PDF uploaded successfully!")
+    except Exception as e:
+        st.write("ERROR {e}....")
 
 question = st.text_input("Ask your question")
 
