@@ -1,10 +1,23 @@
+# streamlit
+# python-dotenv
+# openai
+# langchain
+# langchain-groq
+# langchain_community
+# langchain_core
+# pypdf
+# chromadb
+# sentence-transformers
+# torch
 streamlit
-python-dotenv
-openai
 langchain
+langchain-community
+langchain-classic
 langchain-groq
-langchain_community
-langchain_core
-pypdf
 chromadb
+langchain-huggingface
 sentence-transformers
+transformers
+torch
+pypdf
+python-dotenv

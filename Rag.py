@@ -4,7 +4,8 @@ import streamlit as st
 
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import HuggingFaceEmbeddings
+# from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_groq import ChatGroq
 from langchain_classic.chains import RetrievalQA
@@ -12,6 +13,7 @@ from langchain_classic.chains import RetrievalQA
 
 
 class rag_chatbot:
+    
     def __init__(self):
         print("loading api")
         load_dotenv()
@@ -20,13 +22,16 @@ class rag_chatbot:
         if not self.groq_api_key :
             raise ValueError("key is not found")
         print("api key fetch secussfuly")
-        self.embedding=HuggingFaceEmbeddings()
+        self.embedding = HuggingFaceEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
+                )
         self.llm=ChatGroq(
             model="openai/gpt-oss-20b",
             api_key=self.groq_api_key,
             temperature=0.5,
             model_kwargs={'tool_choice':'auto'}
         )
+    
     def data_pipline(self,path):
         print("fetching document")
 
