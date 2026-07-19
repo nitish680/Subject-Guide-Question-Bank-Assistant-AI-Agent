@@ -33,11 +33,16 @@ class rag_chatbot:
         )
     
     def data_pipline(self,path):
-        print("fetching document")
+        try:
+            print("fetching document")
 
-        loader=PyPDFLoader(path)
-        doc=loader.load()
-        print("document load sucessfuly")
+            loader=PyPDFLoader(path)
+            doc=loader.load()
+            print("document load sucessfuly")
+       
+        except Exception as e:
+            print(f"Could not read PDF: {e}")
+    
     
         
         if not doc:
@@ -50,7 +55,8 @@ class rag_chatbot:
         chunks=splitter.split_documents(doc)
 
         print("sucessfully..........")
-
+        if not chunks:
+            raise ValueError("No readable text found in the uploaded PDF.")
         # embedding=HuggingFaceEmbeddings()
         self.vector_store=Chroma.from_documents(
             documents=chunks,
