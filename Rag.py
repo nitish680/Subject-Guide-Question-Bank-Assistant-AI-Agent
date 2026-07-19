@@ -55,7 +55,6 @@ class rag_chatbot:
         self.vector_store=Chroma.from_documents(
             documents=chunks,
             embedding=self.embedding,
-            persist_directory="./chroma_db"
 
         )
         self.retriever=self.vector_store.as_retriever(search_kwargs={"k":2})
