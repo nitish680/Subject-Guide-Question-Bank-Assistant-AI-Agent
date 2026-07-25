@@ -2,7 +2,7 @@ import tempfile
 import streamlit as st
 from Rag import rag_chatbot
 
-st.title("📄 AI ChatBot")
+st.title("📄Subject Guide & Question Bank Assistant AI")
 
 # Create chatbot only once
 if "rag_chat" not in st.session_state:
