@@ -17,8 +17,8 @@ class rag_chatbot:
     def __init__(self):
         print("loading api")
         load_dotenv()
-        self.groq_api_key=os.getenv('groq_api_key')
-        # self.groq_api_key = st.secrets["groq_api_key"]
+        # self.groq_api_key=os.getenv('groq_api_key')
+        self.groq_api_key = st.secrets["groq_api_key"]
 
         if not self.groq_api_key :
             raise ValueError("key is not found")
