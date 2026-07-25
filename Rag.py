@@ -17,7 +17,8 @@ class rag_chatbot:
     def __init__(self):
         print("loading api")
         load_dotenv()
-        self.groq_api_key = st.secrets["groq_api_key"]
+        self.groq_api_key=os.getenv('groq_api_key')
+        # self.groq_api_key = st.secrets["groq_api_key"]
 
         if not self.groq_api_key :
             raise ValueError("key is not found")
@@ -32,27 +33,34 @@ class rag_chatbot:
             model_kwargs={'tool_choice':'auto'}
         )
     
-    def data_pipline(self,path):
-        try:
-            print("fetching document")
+    def data_pipline(self,pdf_files):
+        
+        all_documents=[]
+        for file_info in pdf_files:
+            try:
+                print("fetching document")
 
-            loader=PyPDFLoader(path)
-            doc=loader.load()
-            print("document load sucessfuly")
+                loader=PyPDFLoader(file_info["path"])
+                doc=loader.load()
+                for document in doc:
+                    document.metadata['source']=file_info['source']
+                    document.metadata["document_type"] = file_info["document_type"]
+                all_documents.extend(doc)
+                print("document load sucessfuly")
        
-        except Exception as e:
-            print(f"Could not read PDF: {e}")
+            except Exception as e:
+                print(f"Could not read PDF: {e}")
     
     
         
-        if not doc:
+        if not all_documents:
             raise ValueError("document is not available")
         
         splitter=RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
         )
-        chunks=splitter.split_documents(doc)
+        chunks=splitter.split_documents(all_documents)
 
         print("sucessfully..........")
         if not chunks:
@@ -64,14 +72,7 @@ class rag_chatbot:
 
         )
         self.retriever=self.vector_store.as_retriever(search_kwargs={"k":2})
-        # print("vector store created secussfuly")
-    
-        # llm=ChatGroq(
-        #     model="openai/gpt-oss-20b",
-        #     api_key=self.groq_api_key,
-        #     temperature=0.5,
-        #     model_kwargs={'tool_choice':'auto'}
-        # )
+        
         self.qa_chain=RetrievalQA.from_chain_type(
             llm=self.llm,
             retriever=self.retriever,
@@ -86,11 +87,4 @@ class rag_chatbot:
     
     
 
-# if __name__=='__main__':
-#     # rag=rag_chatbot()
-#     # docs=rag.load_document('C:\RAG_RANDOM\scholarship_info (1).pdf')
-#     # chunks=rag.splitter(docs)
-#     rag.vector_store(chunks)
-#     rag.llm()
-#     rag.ask_query("who is eligible for scholarship ")
     
