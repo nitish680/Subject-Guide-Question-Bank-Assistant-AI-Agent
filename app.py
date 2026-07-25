@@ -3,7 +3,7 @@ import streamlit as st
 from Rag import rag_chatbot
 
 st.title("📄Subject Guide & Question Bank Assistant AI")
-
+st.markdown("An AI-powered Academic Learning Assistant that helps students learn from lecture notes, textbooks, lab manuals, and previous-year question papers using Retrieval-Augmented Generation (RAG)")
 # Create chatbot only once
 if "rag_chat" not in st.session_state:
     st.session_state.rag_chat = rag_chatbot()
