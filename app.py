@@ -13,8 +13,10 @@ rag_chat = st.session_state.rag_chat
 # Track whether documents have already been processed
 if "processed_files" not in st.session_state:
     st.session_state.processed = []
-
-
+#new changes
+if "message_history" not in st.session_state:
+    st.session_state['message_history']=[]
+    
 uploaded_files = st.file_uploader(
     "Upload PDF(s)",
     type=["pdf"],
@@ -47,35 +49,125 @@ if uploaded_files and not st.session_state.processed:
 
     st.success("PDFs uploaded successfully!")
 
+# for message in st.session_state['message_history']:
+#      with st.chat_message(message['role']):
+#          st.text(message['result'])
+#          for doc in message["source"]:
+#                      # st.write(doc.metadata)
+#                          source = doc.metadata["source"]
+#                          page = doc.metadata["page"] + 1
+#                          st.write(f"📄 {source} (Page {page})")
+for message in st.session_state["message_history"]:
 
-question = st.text_input("Ask your question")
+    with st.chat_message(message["role"]):
 
-if st.button("Ask"):
+        st.text(message["result"])
+
+        if message["role"] == "ai":
+
+            displayed_sources = set()
+
+            st.subheader("📚 Sources")
+
+            for doc in message["source"]:
+
+                source = doc.metadata["source"]
+                page = doc.metadata["page"] + 1
+
+                key = (source, page)
+
+                if key not in displayed_sources:
+
+                    displayed_sources.add(key)
+
+                    st.write(f"📄 {source} (Page {page})")
+
+question = st.chat_input("Ask your question")
+# question=st.text_input("ASK Anything..")
+
+# if st.button("Ask"):
+# if question:
+    
+#     if not st.session_state.processed:
+#         st.warning("Please upload PDF(s) first.")
+
+#     elif question:
+
+
+#             # answer = rag_chat.ask_query(question)
+#         st.session_state['message_history'].append({'role':'user','result':question})
+#         with st.chat_message('user'):
+#             st.text(question)
+
+#         # st.write(answer["result"])
+#         with st.spinner("Thinking..."):
+#             answer=rag_chat.ask_query(question)
+#             with st.chat_message('ai'):
+#                 st.text(answer['result'])
+#             st.session_state['message_history'].append({'role':'ai','result':answer,'source':answer['source']})
+
+#             st.subheader("Sources")
+        
+#             displayed_sources = set()
+
+#             for doc in answer["source"]:
+#             # st.write(doc.metadata)
+#                 source = doc.metadata["source"]
+#                 page = doc.metadata["page"] + 1
+
+#                 key = (source, page)
+#                 if key not in displayed_sources:
+
+#                     displayed_sources.add(key)
+
+#                     st.write(f"📄 {source} (Page {page})")
+if question:
 
     if not st.session_state.processed:
-        st.warning("Please upload PDF(s) first.")
+        st.warning("Please upload PDFs first.")
 
-    elif question:
+    else:
+
+        # User message
+        st.session_state["message_history"].append(
+            {
+                "role": "user",
+                "result": question
+            }
+        )
+
+        with st.chat_message("user"):
+            st.markdown(question)
 
         with st.spinner("Thinking..."):
 
             answer = rag_chat.ask_query(question)
 
-        st.write(answer["result"])
+        with st.chat_message("ai"):
 
-        st.subheader("Sources")
-        
-        displayed_sources = set()
+            st.markdown(answer["result"])
 
-        for doc in answer["source"]:
-            # st.write(doc.metadata)
-            source = doc.metadata["source"]
-            page = doc.metadata["page"] + 1
+            st.markdown("### 📚 Sources")
 
-            key = (source, page)
+            displayed_sources = set()
 
-            if key not in displayed_sources:
+            for doc in answer["source"]:
 
-                displayed_sources.add(key)
+                source = doc.metadata["source"]
+                page = doc.metadata["page"] + 1
 
-                st.write(f"📄 {source} (Page {page})")
+                key = (source, page)
+
+                if key not in displayed_sources:
+
+                    displayed_sources.add(key)
+
+                    st.write(f"📄 {source} (Page {page})")
+
+        st.session_state["message_history"].append(
+            {
+                "role": "ai",
+                "result": answer["result"],
+                "source": answer["source"]
+            }
+        )
