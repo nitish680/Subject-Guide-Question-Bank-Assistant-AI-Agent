@@ -1,7 +1,8 @@
 import os 
 from dotenv import load_dotenv
 import streamlit as st
-
+from graph import build_graph
+from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 # from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -32,7 +33,8 @@ class rag_chatbot:
             temperature=0.5,
             model_kwargs={'tool_choice':'auto'}
         )
-    
+        self.search_tool = DuckDuckGoSearchRun()
+        self.graph = build_graph(self)
     def data_pipline(self,pdf_files):
         
         all_documents=[]
@@ -73,18 +75,76 @@ class rag_chatbot:
         )
         self.retriever=self.vector_store.as_retriever(search_kwargs={"k":2})
         
-        self.qa_chain=RetrievalQA.from_chain_type(
-            llm=self.llm,
-            retriever=self.retriever,
-            return_source_documents=True
+    def ask_query(self, query):
+        state = {
+            "query": query,
+            "category": "",
+            "context": "",
+            "answer": "",
+            "source_documents": []
+        }
+        result = self.graph.invoke(state)
+        return {
+            "result": result["answer"],
+            "source": result["source_documents"]
+        }
+    def router(self, state):
+        if state["category"] == "academic":
+            return "academic"
 
+        return "general"
+    def classifier_node(self, state):
+
+        prompt = f"""
+        Classify the following question.
+
+        Categories:
+        - academic
+        - general
+
+        Return only one word.
+
+        Question:
+        {state["query"]}
+        """
+        response = self.llm.invoke(prompt)
+        state["category"] = response.content.strip().lower()
+        return state
+    def academic_node(self, state):
+        docs = self.retriever.invoke(state["query"])
+        context = ""
+        for doc in docs:
+            context += doc.page_content + "\n\n"
+        state["context"] = context
+        state["source_documents"] = docs
+
+        return state
+    def web_search_node(self, state):
+
+        result = self.search_tool.invoke(
+            state["query"]
         )
-    def ask_query(self,query):
-        response=self.qa_chain.invoke({'query':query})
-        return {'result':response['result'],
-                'source':response['source_documents']}
-    
-    
-    
 
+        state["context"] = result
+        state["source_documents"] = []
+
+        return state
+    def answer_node(self, state):
+
+        prompt = f"""
+        You are an AI Academic Learning Assistant.
+        Answer ONLY using the provided context.
+        If the answer is not available in the context,
+        say:
+        "I couldn't find this information in the uploaded documents."
+    Explain clearly.
+    Use headings when needed.
+    Context:
+    {state["context"]}
+    Question:
+    {state["query"]}
+    """
+        response = self.llm.invoke(prompt)
+        state["answer"] = response.content
+        return state
     
