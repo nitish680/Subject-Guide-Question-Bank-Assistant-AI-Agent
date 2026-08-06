@@ -1,17 +1,8 @@
 import tempfile
 import streamlit as st
 from Rag import rag_chatbot
-import uuid
-# -------------------utiliy function
-def generate_thread_id():
-    thread_id=str(uuid.uuid4())
-    return thread_id
-def reset():
-    thread_id=generate_thread_id()
-    st.session_state['thread_id']=thread_id
-    # st.session_state.processed = False
-    st.session_state['message_history']=[]
-st.title("AI-Chatbot")
+
+st.title("📄AI-Chatbot")
 st.markdown("An AI-powered Academic Learning Assistant that helps students learn from lecture notes, textbooks, lab manuals, and previous-year question papers using Retrieval-Augmented Generation (RAG)")
 # Create chatbot only once
 if "rag_chat" not in st.session_state:
@@ -21,13 +12,10 @@ rag_chat = st.session_state.rag_chat
 
 # Track whether documents have already been processed
 if "processed_files" not in st.session_state:
-    st.session_state.processed = False
+    st.session_state.processed = []
 #new changes
 if "message_history" not in st.session_state:
     st.session_state['message_history']=[]
-if "thread_id" not in st.session_state:
-    st.session_state['thread_id']=generate_thread_id()
-
     
 uploaded_files = st.file_uploader(
     "Upload PDF(s)",
@@ -35,7 +23,7 @@ uploaded_files = st.file_uploader(
     accept_multiple_files=True
 )
 
-config={'configurable':{'thread_id':st.session_state['thread_id']}}
+
 # Process documents only once after upload
 if uploaded_files and not st.session_state.processed:
 
@@ -61,7 +49,14 @@ if uploaded_files and not st.session_state.processed:
 
     st.success("PDFs uploaded successfully!")
 
-
+# for message in st.session_state['message_history']:
+#      with st.chat_message(message['role']):
+#          st.text(message['result'])
+#          for doc in message["source"]:
+#                      # st.write(doc.metadata)
+#                          source = doc.metadata["source"]
+#                          page = doc.metadata["page"] + 1
+#                          st.write(f"📄 {source} (Page {page})")
 for message in st.session_state["message_history"]:
 
     with st.chat_message(message["role"]):
@@ -72,7 +67,7 @@ for message in st.session_state["message_history"]:
 
             displayed_sources = set()
 
-            st.subheader(" Sources")
+            st.subheader("📚 Sources")
 
             for doc in message["source"]:
 
@@ -85,14 +80,47 @@ for message in st.session_state["message_history"]:
 
                     displayed_sources.add(key)
 
-                    st.write(f"{source} (Page {page})")
+                    st.write(f"📄 {source} (Page {page})")
 
 question = st.chat_input("Ask your question")
-st.sidebar.title("AI-Chatbot")
-if st.sidebar.button("New-Chat"):
-    reset()
-    st.rerun()
-st.sidebar.title("Chat-History")
+# question=st.text_input("ASK Anything..")
+
+# if st.button("Ask"):
+# if question:
+    
+#     if not st.session_state.processed:
+#         st.warning("Please upload PDF(s) first.")
+
+#     elif question:
+
+
+#             # answer = rag_chat.ask_query(question)
+#         st.session_state['message_history'].append({'role':'user','result':question})
+#         with st.chat_message('user'):
+#             st.text(question)
+
+#         # st.write(answer["result"])
+#         with st.spinner("Thinking..."):
+#             answer=rag_chat.ask_query(question)
+#             with st.chat_message('ai'):
+#                 st.text(answer['result'])
+#             st.session_state['message_history'].append({'role':'ai','result':answer,'source':answer['source']})
+
+#             st.subheader("Sources")
+        
+#             displayed_sources = set()
+
+#             for doc in answer["source"]:
+#             # st.write(doc.metadata)
+#                 source = doc.metadata["source"]
+#                 page = doc.metadata["page"] + 1
+
+#                 key = (source, page)
+#                 if key not in displayed_sources:
+
+#                     displayed_sources.add(key)
+
+#                     st.write(f"📄 {source} (Page {page})")
 if question:
 
     if not st.session_state.processed:
@@ -119,7 +147,7 @@ if question:
 
             st.markdown(answer["result"])
 
-            st.markdown("###  Sources")
+            st.markdown("### 📚 Sources")
 
             displayed_sources = set()
 
@@ -134,7 +162,7 @@ if question:
 
                     displayed_sources.add(key)
 
-                    st.write(f" {source} (Page {page})")
+                    st.write(f"📄 {source} (Page {page})")
 
         st.session_state["message_history"].append(
             {
