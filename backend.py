@@ -20,7 +20,7 @@ load_dotenv()
 import streamlit as st
 
 groq_key = os.getenv("groq_api_key") or st.secrets.get("groq_api_key")
-weather_key = os.getenv("weather_api") or st.secrets.get("weather_api")
+weather_key = os.getenv("weather_api_key") or st.secrets.get("weather_api_key")
 # Setup SQLite Checkpointer
 conn = sqlite3.connect('sqldb', check_same_thread=False)
 checkpointer = SqliteSaver(conn=conn)
