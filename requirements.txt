@@ -23,4 +23,4 @@ pypdf
 python-dotenv
 torchvision
 langgraph.checkpoint.sqlite
-duckduckgo-search
+ddgs
